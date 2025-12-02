@@ -13,111 +13,87 @@
 
 using namespace std;
 
-Grafo* cargarGrafoDesdeArchivo(const string& nombreArchivo)
+Grafo* cargarGrafo(const string& nombreArchivo)
 {
     ifstream in(nombreArchivo.c_str());
-    if (!in)
+    if (in)
     {
-        cout << "No se pudo abrir el archivo: " << nombreArchivo << endl;
-        return nullptr;
-    }
+        Hash hashVertices;
+        Lista8<Arista> listaAristas;
+        int cantidadVertices = 0;
+        set<pair<string, string>> aristasVistas;
 
-    Hash hashVertices;
-    Lista8<Arista> listaAristas;
-
-    int cantidadVertices = 0;
-    int cantidadAristas = 0;
-
-    set<pair<string, string>> aristasVistas;
-
-    string linea;
-
-    while (getline(in, linea))
-    {
-        if (linea.empty())
-            continue;
-
-        stringstream ss(linea);
-        string nombreOrigen;
-
-        if (!(ss >> nombreOrigen))
-            continue;
-
-        if (!hashVertices.buscar(nombreOrigen))
+        string linea;
+        while (getline(in, linea))
         {
-            hashVertices.insertar(nombreOrigen);
-            cantidadVertices++;
-        }
-
-        string nombreDestino;
-        while (ss >> nombreDestino)
-        {
-            if (nombreDestino == "-1")
-                break;
-
-            if (!hashVertices.buscar(nombreDestino))
+            stringstream ss(linea);
+            string origen;
+            ss >> origen;
+            if (!hashVertices.buscar(origen))
             {
-                hashVertices.insertar(nombreDestino);
+                hashVertices.insertar(origen);
                 cantidadVertices++;
             }
-
-            string a = nombreOrigen;
-            string b = nombreDestino;
-            if (b < a) std::swap(a, b); 
-
-            pair<string, string> clave = { a, b };
-
-            auto res = aristasVistas.insert(clave);
-            if (res.second)
+            string destino;
+            while ((ss >> destino) && (destino != "-1"))
             {
-                Arista ar(a, b);      
-                listaAristas.insertarFin(ar);
-                cantidadAristas++;
+                if (!hashVertices.buscar(destino))
+                {
+                    hashVertices.insertar(destino);
+                    cantidadVertices++;
+                }
+
+                string a = origen;
+                string b = destino;
+                if (b < a)
+                {
+                    string temp = a;
+                    a = b;
+                    b = temp;
+                }
+
+                pair<string, string> clave(a, b);
+                if (aristasVistas.insert(clave).second)
+                {
+                    listaAristas.insertarFin(Arista(a, b));
+                }
             }
         }
+        Grafo* g = new Grafo(cantidadVertices);
+        Caja<Arista>* p = listaAristas.getPri();
+        while (p != nullptr)
+        {
+            Arista a = p->getElemento();
+            g->agregarArista(a.getOrigen(), a.getDestino());
+            p = p->getSiguiente();
+        }
+        return g;
     }
-
-    Grafo* g = new Grafo(cantidadVertices);
-
-    Caja<Arista>* p = listaAristas.getPri();
-    while (p != nullptr)
-    {
-        Arista a = p->getElemento();
-        g->agregarArista(a.getOrigen(), a.getDestino());
-        p = p->getSiguiente();
-    }
-
-    return g;
+    return nullptr;
 }
 
 int main()
 {
     srand((unsigned)time(NULL));
 
-    int opcionArchivo;
-    string nombreArchivo;
+    int op;
+    string archivo;
 
     cout << "Seleccione el archivo a usar:\n";
     cout << "1) Min_Cut_NOMBRES Prueba.txt\n";
     cout << "2) MIN_CUT_CON_NOMBRES.txt\n";
-    cout << "Opcion: ";
-    cin >> opcionArchivo;
+    cin >> op;
 
-    if (opcionArchivo == 1)
+    if (op == 1)
     {
-        nombreArchivo = "Min_Cut_NOMBRES Prueba.txt";
+        archivo = "Min_Cut_NOMBRES Prueba.txt";
     }
-    else if (opcionArchivo == 2)
+    else if (op == 2)
     {
-        nombreArchivo = "MIN_CUT_CON_NOMBRES.txt";
-    }
-    else
-    {
-        cout << "Opcion invalida.\n";
-        return 0;
+        archivo = "MIN_CUT_CON_NOMBRES.txt";
     }
 
-    Grafo* grafo = cargarGrafoDesdeArchivo(nombreArchivo);
+    Grafo* grafo = cargarGrafo(archivo);
     if (grafo == nullptr)
     {
         cout << "No se pudo construir el grafo.\n";
@@ -128,7 +104,7 @@ int main()
     cout << "Vertices: " << grafo->getCantidadVertices() << endl;
     cout << "Aristas: " << grafo->getCantidadAristas() << endl;
 
-    int repeticiones = 212000;
+    int repeticiones = 50000;
     int mejorCorte = grafo->repetirKarger(repeticiones);
 
     cout << "\nResultado de Karger (" << repeticiones << " repeticiones):\n";

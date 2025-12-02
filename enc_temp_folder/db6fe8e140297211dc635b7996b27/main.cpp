@@ -13,12 +13,11 @@
 
 using namespace std;
 
-Grafo* cargarGrafoDesdeArchivo(const string& nombreArchivo)
+Grafo* cargarGrafo(const string& nombreArchivo)
 {
     ifstream in(nombreArchivo.c_str());
     if (!in)
     {
-        cout << "No se pudo abrir el archivo: " << nombreArchivo << endl;
         return nullptr;
     }
 
@@ -26,7 +25,6 @@ Grafo* cargarGrafoDesdeArchivo(const string& nombreArchivo)
     Lista8<Arista> listaAristas;
 
     int cantidadVertices = 0;
-    int cantidadAristas = 0;
 
     set<pair<string, string>> aristasVistas;
 
@@ -72,14 +70,9 @@ Grafo* cargarGrafoDesdeArchivo(const string& nombreArchivo)
             {
                 Arista ar(a, b);      
                 listaAristas.insertarFin(ar);
-                cantidadAristas++;
             }
         }
     }
-
-    cout << "\nGrafo cargado desde: " << nombreArchivo << endl;
-    cout << "Cantidad de vertices (nombres distintos): " << cantidadVertices << endl;
-    cout << "Cantidad de aristas (sin duplicados): " << cantidadAristas << endl;
 
     Grafo* g = new Grafo(cantidadVertices);
 
@@ -98,30 +91,24 @@ int main()
 {
     srand((unsigned)time(NULL));
 
-    int opcionArchivo;
-    string nombreArchivo;
+    int op;
+    string archivo;
 
     cout << "Seleccione el archivo a usar:\n";
     cout << "1) Min_Cut_NOMBRES Prueba.txt\n";
     cout << "2) MIN_CUT_CON_NOMBRES.txt\n";
-    cout << "Opcion: ";
-    cin >> opcionArchivo;
+    cin >> op;
 
-    if (opcionArchivo == 1)
+    if (op == 1)
     {
-        nombreArchivo = "Min_Cut_NOMBRES Prueba.txt";
+        archivo = "Min_Cut_NOMBRES Prueba.txt";
     }
-    else if (opcionArchivo == 2)
+    else if (op == 2)
     {
-        nombreArchivo = "MIN_CUT_CON_NOMBRES.txt";
-    }
-    else
-    {
-        cout << "Opcion invalida.\n";
-        return 0;
+        archivo = "MIN_CUT_CON_NOMBRES.txt";
     }
 
-    Grafo* grafo = cargarGrafoDesdeArchivo(nombreArchivo);
+    Grafo* grafo = cargarGrafo(archivo);
     if (grafo == nullptr)
     {
         cout << "No se pudo construir el grafo.\n";
@@ -132,8 +119,8 @@ int main()
     cout << "Vertices: " << grafo->getCantidadVertices() << endl;
     cout << "Aristas: " << grafo->getCantidadAristas() << endl;
 
-    int repeticiones = 212000;
-    int mejorCorte = grafo->ejecutarKargerVariasVeces(repeticiones);
+    int repeticiones = 50000;
+    int mejorCorte = grafo->repetirKarger(repeticiones);
 
     cout << "\nResultado de Karger (" << repeticiones << " repeticiones):\n";
     cout << "Corte minimo estimado = " << mejorCorte << endl;
