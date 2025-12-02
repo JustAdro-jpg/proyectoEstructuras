@@ -77,6 +77,10 @@ Grafo* cargarGrafoDesdeArchivo(const string& nombreArchivo)
         }
     }
 
+    cout << "\nGrafo cargado desde: " << nombreArchivo << endl;
+    cout << "Cantidad de vertices (nombres distintos): " << cantidadVertices << endl;
+    cout << "Cantidad de aristas (sin duplicados): " << cantidadAristas << endl;
+
     Grafo* g = new Grafo(cantidadVertices);
 
     Caja<Arista>* p = listaAristas.getPri();
@@ -129,7 +133,7 @@ int main()
     cout << "Aristas: " << grafo->getCantidadAristas() << endl;
 
     int repeticiones = 212000;
-    int mejorCorte = grafo->repetirKarger(repeticiones);
+    int mejorCorte = grafo->ejecutarKargerVariasVeces(repeticiones);
 
     cout << "\nResultado de Karger (" << repeticiones << " repeticiones):\n";
     cout << "Corte minimo estimado = " << mejorCorte << endl;

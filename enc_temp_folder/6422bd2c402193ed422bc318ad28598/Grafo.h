@@ -11,10 +11,11 @@ using namespace std;
 class Grafo
 {
 private:
-    int nVertices;
-    vector<Arista> aristas;
+    int nVertices;          // cantidad de vertices distintos (ciudades)
+    vector<Arista> aristas; // SIN punteros, SIN new/delete
 
 public:
+    // Constructor: recibimos cantidad de vertices distintos
     Grafo(int numVertices)
     {
         nVertices = numVertices;
@@ -22,7 +23,7 @@ public:
 
     void agregarArista(const string& o, const string& d)
     {
-        aristas.emplace_back(o, d);
+        aristas.emplace_back(o, d); // crea Arista(o,d) al final
     }
 
     int getCantidadVertices() const
@@ -46,6 +47,7 @@ public:
         }
     }
 
+    // Devuelve el índice de una arista elegida al azar
     int obtenerIndiceAristaAleatoria() const
     {
         if (aristas.empty())
@@ -54,6 +56,7 @@ public:
         return indice;
     }
 
+    // Eliminar autociclos (aristas (u,u))
     void eliminarAutociclos()
     {
         int k = 0;
@@ -68,6 +71,7 @@ public:
         aristas.resize(k);
     }
 
+    // Contraer una arista: fusionar sus dos vertices
     void contraerArista(int indice)
     {
         if (indice < 0 || indice >= (int)aristas.size())
@@ -79,6 +83,7 @@ public:
         if (u == v)
             return; // ya era autociclo
 
+        // Reemplazar todas las apariciones de v por u
         for (int i = 0; i < (int)aristas.size(); ++i)
         {
             if (aristas[i].getOrigen() == v)
@@ -86,12 +91,20 @@ public:
             if (aristas[i].getDestino() == v)
                 aristas[i].setDestino(u);
         }
+
+        // Eliminar las aristas internas (autociclos) del nuevo supervertice
         eliminarAutociclos();
+
+        // Hemos fusionado v dentro de u, por lo que hay un vertice menos
         nVertices--;
     }
 
-    int karger() const
+    // Una sola ejecución de Karger
+    int ejecutarKargerUnaVez() const
     {
+        // 👇 Este es el punto clave:
+        // Grafo g = *this crea una COPIA profunda del vector de aristas,
+        // porque vector se copia por valor.
         Grafo g = *this;
 
         while (g.nVertices > 2)
@@ -102,16 +115,19 @@ public:
 
             g.contraerArista(idx);
         }
+
+        // Cuando quedan 2 supervertices, todas las aristas restantes cruzan el corte
         return (int)g.aristas.size();
     }
 
-    int repetirKarger(int repeticiones) const
+    // Ejecutar Karger varias veces para aumentar la probabilidad de encontrar el verdadero corte mínimo
+    int ejecutarKargerVariasVeces(int repeticiones) const
     {
         int mejor = INT_MAX;
 
         for (int i = 0; i < repeticiones; ++i)
         {
-            int corte = karger();
+            int corte = ejecutarKargerUnaVez();
             if (corte < mejor)
             {
                 mejor = corte;
