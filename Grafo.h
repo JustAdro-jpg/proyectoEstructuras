@@ -2,8 +2,8 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <cstdlib>   // rand
-#include <climits>   // INT_MAX
+#include <cstdlib>  
+#include <climits>   
 #include "Arista.h"
 
 using namespace std;
@@ -48,10 +48,10 @@ public:
 
     int obtenerIndiceAristaAleatoria() const
     {
-        if (aristas.empty())
+        if (aristas.empty()) {
             return -1;
-        int indice = rand() % aristas.size();
-        return indice;
+        }
+        return rand() % (int)aristas.size();
     }
 
     void eliminarAutociclos()
@@ -70,37 +70,32 @@ public:
 
     void contraerArista(int indice)
     {
-        if (indice < 0 || indice >= (int)aristas.size())
-            return;
-
-        string u = aristas[indice].getOrigen();
-        string v = aristas[indice].getDestino();
-
-        if (u == v)
-            return; // ya era autociclo
-
-        for (int i = 0; i < (int)aristas.size(); ++i)
-        {
-            if (aristas[i].getOrigen() == v)
-                aristas[i].setOrigen(u);
-            if (aristas[i].getDestino() == v)
-                aristas[i].setDestino(u);
+        if (indice >= 0 && indice < (int)aristas.size()) {
+            string u = aristas[indice].getOrigen();
+            string v = aristas[indice].getDestino();
+        
+            for (int i = 0; i < (int)aristas.size(); ++i)
+            {
+                if (aristas[i].getOrigen() == v)
+                    aristas[i].setOrigen(u);
+                if (aristas[i].getDestino() == v)
+                    aristas[i].setDestino(u);
+            }
+            eliminarAutociclos();
+            nVertices--;
         }
-        eliminarAutociclos();
-        nVertices--;
     }
 
     int karger() const
     {
         Grafo g = *this;
-
         while (g.nVertices > 2)
         {
-            int idx = g.obtenerIndiceAristaAleatoria();
-            if (idx == -1)
+            int indice = g.obtenerIndiceAristaAleatoria();
+            if (indice == -1) {
                 break;
-
-            g.contraerArista(idx);
+            }
+            g.contraerArista(indice);
         }
         return (int)g.aristas.size();
     }
@@ -108,7 +103,6 @@ public:
     int repetirKarger(int repeticiones) const
     {
         int mejor = INT_MAX;
-
         for (int i = 0; i < repeticiones; ++i)
         {
             int corte = karger();
@@ -117,7 +111,6 @@ public:
                 mejor = corte;
             }
         }
-
         return mejor;
     }
 };
